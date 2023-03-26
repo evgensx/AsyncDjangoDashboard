@@ -7,6 +7,7 @@ from currency.index import worker1
 class CurrencyConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'currency'
+    verbose_name = 'Курсы'
 
 # подключаемся к потоку
 loop = asyncio.get_running_loop()

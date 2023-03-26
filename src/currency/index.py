@@ -10,7 +10,7 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 # import django
 # django.setup()
-from currency.models import Value
+# from currency.models import Value
 
 from os import environ
 from dotenv import load_dotenv
