@@ -1,0 +1,73 @@
+version: '3.9'
+
+services:
+  # nginx:
+  #   build: ./nginx
+  #   ports:
+  #     - 1337:80
+  #   depends_on:
+  #     - frontend
+
+  # frontend:
+  #   image: jenek46/kanalservis_frontend
+  #   container_name: kanalservis_frontend
+  #   hostname: frontend
+  #   networks:
+  #     default:
+  #       ipv4_address: 172.19.0.2
+  #   ports:
+  #     - 80:80
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #     target: frontend
+  #   # depends_on:
+  #   # - backend
+  #   restart: unless-stopped
+
+  backend:
+    image: jenek46/kanalservis_backend
+    container_name: kanalservis_backend
+    hostname: backend
+    networks:
+      - default
+    ports:
+      - 8000:8000
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+      target: backend
+    depends_on:
+      - database
+    env_file:
+      - ./.env.prod
+    command: >
+      sh -c "python manage.py migrate &&
+             poetry run gunicorn --bind 0.0.0.0:8000 core.wsgi"
+    restart: unless-stopped
+
+  database:
+    image: postgres:15.2-bullseye
+    container_name: kanalservis_db
+    hostname: db
+    networks:
+      - default
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: kanalservis
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: passw0rd
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data:rw
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  postgres_volume:
+
+
+# docker-compose -f docker-compose.prod.yml up --build
