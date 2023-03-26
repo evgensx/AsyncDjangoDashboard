@@ -6,11 +6,8 @@ import datetime
 import xml.etree.ElementTree as ET
 import logging
 
-import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
-# import django
-# django.setup()
-# from currency.models import Value
+# import os
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 
 from os import environ
 from dotenv import load_dotenv

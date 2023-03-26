@@ -1,9 +1,9 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Value
+from .models import ExangeRate
 
-@admin.register(Value)
+@admin.register(ExangeRate)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'usd')
-    list_display_links = ('id', 'usd',)
+    list_display = ('id', 'currency', 'value')
+    list_display_links = ('id', 'currency',)

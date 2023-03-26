@@ -1,7 +1,6 @@
 import asyncio
 from django.apps import AppConfig
-from currency.index import worker1
-# from currency.models import Value
+from currency.runner import worker1
 
 
 class CurrencyConfig(AppConfig):
