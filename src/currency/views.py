@@ -8,24 +8,13 @@ from rest_framework import status, serializers
 from .models import ExangeRate
 
 
-import datetime
-from django.http import HttpResponse
-
-
-async def current_datetime(request):
-    rate = await ExangeRate.objects.aupdate_or_create(currency='usd', defaults={'value': 12.3456})
-    print(rate)
-    html = "<html><body>It is now %s</body></html>" % rate[0]
-    return HttpResponse(html)
-
-
 class ExangeRateSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = ExangeRate
         fields = ('pk', 'currency', 'value')
-# Create your views here.
 
+
+# Create your views here.
 
 @sync_to_async
 @api_view(['GET', 'POST'])
@@ -61,16 +50,3 @@ def rate_detail(request, id):
     elif request.method == 'DELETE':
         order.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# async def edit(request, id):
-#     try:
-#         rate = ExangeRate.objects.aget(id=id)
-#         if request.method == "POST":
-#             rate. = request.POST.get("name")
-#             rate.
-#             return HttpResponseRedirect("/")
-#         else:
-#             return render(request, "edit.html", {"person": person})
-#     except Person.DoesNotExist:
-#         return HttpResponseNotFound("<h2>Person not found</h2>")

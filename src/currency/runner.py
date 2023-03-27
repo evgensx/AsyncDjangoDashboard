@@ -6,12 +6,8 @@ import datetime
 import xml.etree.ElementTree as ET
 import logging
 
-# import os
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
-
 from os import environ
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
@@ -23,12 +19,6 @@ UPDATE_TIME = int(environ['UPDATE_TIME'])
 
 date_today = datetime.date.today().strftime("%d/%m/%Y")
 cbr_url = 'https://www.cbr.ru/scripts/XML_daily.asp?date_req=' + date_today
-
-
-# async def update_exange_rate():  # *args, **kwargs
-#     usd_rate = models.Value.objects.aget()
-#     print(usd_rate)
-    # await usd_rate.asave(using="secondary")
 
 
 async def fetch_xml(session, url):
@@ -60,12 +50,21 @@ async def get_value():
         # делаем запрос страницы xml
         xml_data = await fetch_xml(session, cbr_url)
         # парсим
-        parsed_xml = await parse_xml(xml_data)
+        # parsed_xml = await parse_xml(xml_data)
         # вызываем функцию записи в бд
-        print(parsed_xml)
+        result: str = await parse_xml(xml_data)
+        # print(result)
+        return float(result.replace(',', '.'))
 
 
-async def worker1():
+async def update_exange_rate(model_object):
+    rate_value = await get_value()
+    log.info('rate_value %s', rate_value)
+    rate = await model_object.objects.aupdate_or_create(currency='usd', defaults={'value': rate_value})
+    log.info('rate %s', rate)
+
+
+async def worker1(model):
     # await update_exange_rate()
     """
     Воркер проверяющий курс ЦБР каждый день
@@ -74,7 +73,9 @@ async def worker1():
     run_time = datetime.datetime.now()
     # выполняем функцию получения курса валюты
     week_day = run_time.weekday
-    await get_value()
+    
+    await update_exange_rate(model)
+    
     if week_day == 5:
         day = 3
     elif week_day == 6:
@@ -86,13 +87,13 @@ async def worker1():
     # отправляем спать воркер
     await asyncio.sleep(set_time)
     while True:
-        logging.info('Worker 1 is running')
+        log.info('Worker 1 is running')
         # текущее время
         now_time = datetime.datetime.now()
         # т.к. курс обновляется только по будням, выбираем с понедельника по четверг и установленное время
         if now_time.weekday() in [7, 1, 2, 3, 4] and now_time.hour == UPDATE_TIME:
             # получение курса
-            await get_value()
+            await update_exange_rate(model)
             logging.info('Получено значение курса доллара к рублю')
             # засыпаем на сутки
             await asyncio.sleep(3600 * 24)
@@ -117,3 +118,8 @@ async def worker2():
 #         asyncio.run(main(), debug=True)
 #     except KeyboardInterrupt:
 #         logging.info('Выход по ctrl+break')
+
+
+# подключаемся к потоку
+# loop = asyncio.get_running_loop()
+# loop.create_task(worker1())
